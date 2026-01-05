@@ -1,0 +1,23 @@
+{
+  "name": "restaurant-booking-backend",
+  "version": "1.0.0",
+  "description": "Backend для системи бронювання столиків ресторану",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node seed.js"
+  },
+  "keywords": ["restaurant", "booking", "reservation", "express", "mongodb"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
