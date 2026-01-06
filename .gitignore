@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules/
 
 # production
 /build
@@ -12,7 +12,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env*
+.env
 
 # coverage
 /coverage

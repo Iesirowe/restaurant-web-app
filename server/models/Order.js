@@ -45,7 +45,13 @@ const orderSchema = new mongoose.Schema({
   // Поточний статус замовлення
   status: {
     type: String,
-    enum: ['pending', 'preparing', 'ready', 'delivered', 'cancelled'],
+      enum: [
+      'pending',
+      'in_progress',
+      'ready',
+      'completed',
+      'cancelled'
+    ],
     default: 'pending'
   },
   // Дата створення замовлення
