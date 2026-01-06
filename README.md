@@ -33,27 +33,31 @@ MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/restaurant
 NODE_ENV=development
 Реальні значення змінних середовища не додаються до репозиторію з міркувань безпеки.
 
-client/.env.example
-
-VITE_API_URL=http://localhost:5000
 Backend
 
 cd server
 copy .env.example .env     # Windows
-# або
+або
 cp .env.example .env       # Linux / macOS
 
 npm install
+
 npm run dev
+
 Backend API буде доступний за адресою:
+
 http://localhost:5000
 
 Frontend
 
-cd client
+cd client 
+
 npm install
+
 npm run dev
+
 Frontend буде доступний за адресою:
+
 http://localhost:5173
 
 Тестові дані
@@ -65,7 +69,7 @@ node seed.js
 Також тестові дані можуть створюватися безпосередньо через веб-інтерфейс застосунку
 (оформлення бронювання та онлайн-замовлення).
 
-Основні API-ендпоїнти
+### Основні API-ендпоїнти
 POST /api/reservation — створення бронювання
 
 PATCH /api/reservation/:id/cancel — скасування бронювання
@@ -76,7 +80,7 @@ PATCH /api/order/:id/status — зміна статусу замовлення
 
 GET /api/menu — отримання меню
 
-Тестування
+### Тестування
 Тестування виконувалося з використанням MongoDB Atlas та включає:
 
 перевірку створення бронювань;
@@ -87,7 +91,7 @@ GET /api/menu — отримання меню
 
 Результати тестування наведено у вигляді скріншотів та відеопрезентації.
 
-Відеопрезентація 
+### Відеопрезентація 
 Посилання: 
 
 Тривалість: 3–7 хвилин
