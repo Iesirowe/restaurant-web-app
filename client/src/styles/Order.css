@@ -1,0 +1,29 @@
+.order-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  animation: fadeIn 0.6s ease;
+}
+
+.order-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.order-header h1 {
+  font-size: 48px;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.order-header p {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .order-header h1 {
+    font-size: 36px;
+  }
+}
