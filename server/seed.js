@@ -1,10 +1,11 @@
+require("dotenv").config()
 const mongoose = require('mongoose')
 const Table = require('./models/Table')
 const Menu = require('./models/Menu')
 const Reservation = require('./models/Reservation')
 
 // Підключення до бази даних MongoDB
-mongoose.connect('mongodb+srv://user:1234@restaraunt.6pse0pj.mongodb.net/?appName=Restaraunt', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

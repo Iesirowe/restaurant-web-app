@@ -97,7 +97,7 @@ export default function OrderForm() {
     const currentTime = now.toTimeString().slice(0, 5)
 
     // Онлайн-замовлення дозволені лише з 10:00 до 21:00
-    if (currentTime < "10:00" || currentTime > "21:00") {
+   if (currentTime < "10:00" || currentTime > "21:00") {
       setMessage({
         type: "error",
         text: "Онлайн-замовлення приймаються з 10:00 до 21:00",

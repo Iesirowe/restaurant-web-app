@@ -162,7 +162,13 @@ exports.updateOrderStatus = async (req, res) => {
     const { status } = req.body;
 
     // Перелік дозволених статусів
-    const validStatuses = ['pending', 'preparing', 'ready', 'delivered', 'cancelled'];
+    const validStatuses = [
+      'pending',
+      'in_progress',
+      'ready',
+      'completed',
+      'cancelled'
+    ]
     
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
