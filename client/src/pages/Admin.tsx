@@ -7,37 +7,30 @@ import type { Reservation, Order, MenuItem } from "../types/types"
 // Підключення стилів адмін-сторінки
 import "../styles/Admin.css"
 
-// Компонент адміністративної панелі
 export default function Admin() {
-  // Стани для бронювань, замовлень та меню
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
-  // Активна вкладка адмін-панелі
   const [activeTab, setActiveTab] =
     useState<"reservations" | "orders">("reservations")
   const [loading, setLoading] = useState(true)
 
-  // Завантаження даних при першому рендері
   useEffect(() => {
     fetchData()
   }, [])
 
-  // Отримання бронювань, замовлень та меню
   const fetchData = async () => {
     try {
       setLoading(true)
+      const [resRes, ordRes, menuRes] = await Promise.all([
+        api.get("/api/reservation/s"),
+        api.get("/api/order/s"),
+        api.get("/api/menu"),
+      ])
 
-      const [resResponse, ordersResponse, menuResponse] =
-        await Promise.all([
-          api.get("/api/reservation/s"),
-          api.get("/api/order/s"),
-          api.get("/api/menu"),
-        ])
-
-      setReservations(resResponse.data.data)
-      setOrders(ordersResponse.data.data)
-      setMenuItems(menuResponse.data.data)
+      setReservations(resRes.data.data)
+      setOrders(ordRes.data.data)
+      setMenuItems(menuRes.data.data)
     } catch (error) {
       console.error("Error fetching data:", error)
     } finally {
@@ -45,23 +38,44 @@ export default function Admin() {
     }
   }
 
-  // Отримання назви страви за її ID
-  const getMenuItemName = (menuItemId: string): string => {
+  // ===== СКАСУВАННЯ БРОНЮВАННЯ =====
+  const cancelReservation = async (id: string) => {
+    if (!window.confirm("Скасувати це бронювання?")) return
+
+    try {
+      await api.patch(`/api/reservation/${id}/cancel`)
+      fetchData()
+    } catch (error) {
+      console.error("Помилка скасування бронювання", error)
+      alert("Не вдалося скасувати бронювання")
+    }
+  }
+
+  // ===== ЗМІНА СТАТУСУ ЗАМОВЛЕННЯ =====
+  const updateOrderStatus = async (
+    orderId: string,
+    status: Order["status"]
+  ) => {
+    try {
+      await api.patch(`/api/order/${orderId}/status`, { status })
+      fetchData()
+    } catch (error) {
+      console.error("Помилка оновлення статусу", error)
+      alert("Не вдалося змінити статус замовлення")
+    }
+  }
+
+  const getMenuItemName = (menuItemId: string) => {
     const item = menuItems.find((m) => m._id === menuItemId)
     return item?.name || "Невідома страва"
   }
 
-  // Форматування дати
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("uk-UA")
-  }
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString("uk-UA")
 
-  // Форматування дати та часу
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("uk-UA")
-  }
+  const formatDateTime = (date: string) =>
+    new Date(date).toLocaleString("uk-UA")
 
-  // Відображення індикатора завантаження
   if (loading) {
     return (
       <div className="admin-page">
@@ -72,7 +86,6 @@ export default function Admin() {
 
   return (
     <div className="admin-page">
-      {/* Заголовок адмін-панелі */}
       <div className="admin-header">
         <h1>Адміністративна панель</h1>
         <button onClick={fetchData} className="refresh-btn">
@@ -80,7 +93,6 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* Перемикач вкладок */}
       <div className="admin-tabs">
         <button
           className={`tab-btn ${
@@ -98,103 +110,124 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* Вкладка бронювань */}
+      {/* ===== БРОНЮВАННЯ ===== */}
       {activeTab === "reservations" && (
         <div className="admin-content">
-          <h2>Список бронювань</h2>
-          {reservations.length === 0 ? (
-            <p className="empty-message">Немає бронювань</p>
-          ) : (
-            <div className="table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Дата</th>
-                    <th>Час</th>
-                    <th>Ім'я</th>
-                    <th>Телефон</th>
-                    <th>Гостей</th>
-                    <th>Столик</th>
-                    <th>Створено</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reservations.map((reservation) => (
-                    <tr key={reservation._id}>
-                      <td>{formatDate(reservation.date)}</td>
-                      <td>{reservation.time}</td>
-                      <td>{reservation.name}</td>
-                      <td>{reservation.phone}</td>
-                      <td>{reservation.guests}</td>
-                      <td>
-                        {reservation.tableId
-                          ? `№${reservation.tableId.number} (${reservation.tableId.seats} місць)`
-                          : "—"}
-                      </td>
-                      <td>
-                        {reservation.createdAt
-                          ? formatDateTime(reservation.createdAt)
-                          : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Час</th>
+                <th>Імʼя</th>
+                <th>Телефон</th>
+                <th>Гостей</th>
+                <th>Столик</th>
+                <th>Статус</th>
+                <th>Дія</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reservations.map((r) => (
+                <tr key={r._id}>
+                  <td>{formatDate(r.date)}</td>
+                  <td>{r.time}</td>
+                  <td>{r.name}</td>
+                  <td>{r.phone}</td>
+                  <td>{r.guests}</td>
+                  <td>
+                    {r.tableId
+                      ? `№${r.tableId.number} (${r.tableId.seats})`
+                      : "—"}
+                  </td>
+                  <td>{r.status}</td>
+                  <td>
+                    {r.status !== "cancelled" ? (
+                      <button
+                        className="danger"
+                        onClick={() => cancelReservation(r._id)}
+                      >
+                        Скасувати
+                      </button>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Вкладка замовлень */}
+      {/* ===== ЗАМОВЛЕННЯ ===== */}
       {activeTab === "orders" && (
-        <div className="admin-content">
-          <h2>Список замовлень</h2>
-          {orders.length === 0 ? (
-            <p className="empty-message">Немає замовлень</p>
-          ) : (
-            <div className="orders-list">
-              {orders.map((order) => (
-                <div key={order._id} className="order-card">
-                  <div className="order-card-header">
-                    <div>
-                      <strong>{order.name}</strong>
-                      <p>{order.phone}</p>
-                    </div>
-                    <div className="order-status">
-                      <span
-                        className={`status-badge ${order.status}`}
-                      >
-                        {order.status || "новий"}
-                      </span>
-                      <span className="order-total">
-                        {order.totalAmount} ₴
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Список страв у замовленні */}
-                  <div className="order-items-list">
-                    <h4>Страви:</h4>
-                    {order.items.map((item, index) => (
-                      <div key={index} className="order-item-row">
-                        <span>
-                          {getMenuItemName(item.menuItemId)}
-                        </span>
-                        <span>× {item.quantity}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Дата створення замовлення */}
-                  {order.createdAt && (
-                    <div className="order-date">
-                      Створено: {formatDateTime(order.createdAt)}
-                    </div>
-                  )}
+        <div className="admin-content orders-list">
+          {orders.map((order) => (
+            <div key={order._id} className="order-card">
+              <div className="order-card-header">
+                <div>
+                  <strong>{order.name}</strong>
+                  <p>{order.phone}</p>
                 </div>
-              ))}
+                <div className="order-status">
+                  <span className={`status-badge ${order.status}`}>
+                    {order.status}
+                  </span>
+                  <span className="order-total">
+                    {order.totalAmount} ₴
+                  </span>
+                </div>
+              </div>
+
+              <div className="order-items-list">
+                {order.items.map((item, i) => (
+                  <div key={i} className="order-item-row">
+                    <span>{getMenuItemName(item.menuItemId)}</span>
+                    <span>× {item.quantity}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="order-actions">
+                {order.status === "pending" && (
+                  <button
+                    onClick={() =>
+                      updateOrderStatus(order._id, "in_progress")
+                    }
+                  >
+                    В обробці
+                  </button>
+                )}
+
+                {order.status === "in_progress" && (
+                  <button
+                    onClick={() =>
+                      updateOrderStatus(order._id, "ready")
+                    }
+                  >
+                    Готово
+                  </button>
+                )}
+
+                {order.status !== "cancelled" && (
+                  <button
+                    className="danger"
+                    onClick={() =>
+                      updateOrderStatus(order._id, "cancelled")
+                    }
+                  >
+                    Скасувати
+                  </button>
+                )}
+              </div>
+
+              {order.createdAt && (
+                <div className="order-date">
+                  Створено: {formatDateTime(order.createdAt)}
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>
